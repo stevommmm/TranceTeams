@@ -1,5 +1,6 @@
 package com.c45y.C4CTF;
 
+import java.util.UUID;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
@@ -16,7 +17,7 @@ public class C4CTF extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         this.getConfig().options().copyDefaults(true);
-        this.getConfig().addDefault("player.total.count", 1);
+        this.getConfig().addDefault("misc", 1);
         getServer().getPluginManager().registerEvents(this, this);
     }
 
