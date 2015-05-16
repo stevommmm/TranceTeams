@@ -1,0 +1,16 @@
+name: C4CTF
+main: com.c45y.C4CTF.C4CTF
+version: 0.1
+permissions:
+    ctf.user:
+        description: A player
+        default: true
+    ctf.op:
+        description: A admin type player
+        default: op
+commands:
+  ctf:
+    description: Basic command
+    permission: ctf.user
+    usage: |
+           /ctf: [one, two]
