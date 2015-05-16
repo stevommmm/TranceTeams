@@ -14,3 +14,8 @@ commands:
     permission: ctf.user
     usage: |
            /ctf: [one, two]
+  ctfadmin:
+    description: Basic admin command
+    permission: ctf.op
+    usage: |
+           /ctfadmin: [one, two]

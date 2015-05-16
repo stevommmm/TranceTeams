@@ -12,6 +12,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wool;
 
 /**
  *
@@ -19,12 +22,12 @@ import org.bukkit.entity.Player;
  */
 public class ColorTeam {
     private C4CTF plugin;
-    private Material color;
+    private Wool color;
     private Location spawn;
     private Location asset;
     private List<Player> players;
     
-    public ColorTeam(C4CTF plugin, Material color) {
+    public ColorTeam(C4CTF plugin, Wool color) {
         this.plugin = plugin;
         this.color = color;
     }
@@ -56,13 +59,18 @@ public class ColorTeam {
     public void respawnPlayer(Player player) {
         if (this.players.contains(player)) {
             player.teleport(this.spawn);
+            player.getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.color.getData()));
         }
+    }
+    
+    public int countPlayers() {
+        return this.players.size();
     }
     
     // Team persistence
     
     public void toConfig() {
-        String configlocation = "persist." + this.color.name();
+        String configlocation = "persist." + this.color.getColor().name();
         
         // Save spawn location
         this.plugin.getConfig().set(configlocation + ".spawn.x", this.spawn.getX());
@@ -86,7 +94,7 @@ public class ColorTeam {
     }
     
     public void fromConfig() {
-        String configlocation = "persist." + this.color.name();
+        String configlocation = "persist." + this.color.getColor().name();
         
         this.plugin.reloadConfig();
         
