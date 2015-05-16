@@ -5,7 +5,12 @@
  */
 package com.c45y.C4CTF;
 
+import com.c45y.C4CTF.util.ColorMap;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import org.bukkit.DyeColor;
+import org.bukkit.entity.Player;
 import org.bukkit.material.Wool;
 
 /**
@@ -14,7 +19,7 @@ import org.bukkit.material.Wool;
  */
 public class TeamManager {
     private C4CTF plugin;
-    private HashMap<Wool, ColorTeam> teams;
+    private HashMap<Wool, ColorTeam> teams = new HashMap<Wool, ColorTeam>();
     
     public TeamManager(C4CTF plugin) {
         this.plugin = plugin;
@@ -22,7 +27,22 @@ public class TeamManager {
     }
     
     private void populateTeams() {
-        System.out.println(this.plugin.getConfig().getConfigurationSection("persist").getKeys(false).toString());
+        if (this.plugin.getConfig().contains("persist")) {
+            for( String color : this.plugin.getConfig().getConfigurationSection("persist").getKeys(false)) {
+                Wool w = new Wool();
+                w.setColor(DyeColor.valueOf(color));
+                ColorTeam team = new ColorTeam(this.plugin, w);
+                team.fromConfig();
+                this.teams.put(w, team);
+                this.plugin.getLogger().info("Team " + color + " has been loaded!");
+            }
+        }
+    }
+    
+    public void persistTeams() {
+        for( ColorTeam t: this.teams.values()) {
+            t.toConfig();
+        }
     }
     
     public void addTeam(Wool wool) {
@@ -36,6 +56,19 @@ public class TeamManager {
             return this.teams.get(wool);
         }
         return null;
+    }
+    
+    public Collection<ColorTeam> getTeams() {
+        return this.teams.values();
+    }
+    
+    public boolean inTeam(Player player) {
+        for( ColorTeam t: this.teams.values()) {
+            if (t.hasPlayer(player)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public ColorTeam lowestTeam() {

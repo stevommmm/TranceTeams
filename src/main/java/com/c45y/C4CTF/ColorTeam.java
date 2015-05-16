@@ -5,11 +5,14 @@
  */
 package com.c45y.C4CTF;
 
+import com.c45y.C4CTF.util.ColorMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,11 +28,23 @@ public class ColorTeam {
     private Wool color;
     private Location spawn;
     private Location asset;
-    private List<Player> players;
+    private List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
     
     public ColorTeam(C4CTF plugin, Wool color) {
         this.plugin = plugin;
         this.color = color;
+    }
+    
+    public Wool getColor() {
+        return this.color;
+    }
+    
+    public ChatColor getChatColor() {
+        return ColorMap.mapDyeChatColor.get(this.color.getColor());
+    }
+    
+    public String getName() {
+        return this.color.getColor().name();
     }
     
     // Locations
@@ -54,6 +69,18 @@ public class ColorTeam {
     
     public Location getSpawn() {
         return this.spawn;
+    }
+    
+    public void addPlayer(Player player) {
+        this.players.add(player);
+    }
+    
+    public boolean hasPlayer(Player player) {
+        return this.players.contains(player);
+    }
+    
+    public List<OfflinePlayer> getPlayers() {
+        return this.players;
     }
     
     public void respawnPlayer(Player player) {
@@ -86,7 +113,7 @@ public class ColorTeam {
         
         // Save team member player lists
         List<String> plist = new ArrayList<String>();
-        for( Player p: this.players){
+        for( OfflinePlayer p: this.players){
             plist.add(p.getUniqueId().toString());
         }
         this.plugin.getConfig().set(configlocation + ".players", plist);
@@ -119,7 +146,12 @@ public class ColorTeam {
         // Load our players
         List<String> plist = this.plugin.getConfig().getStringList(configlocation + ".players");
         for( String p: plist) {
-            this.players.add(this.plugin.getServer().getPlayer(UUID.fromString(p)));
+            OfflinePlayer player = (OfflinePlayer) this.plugin.getServer().getPlayer(UUID.fromString(p));
+            if (player == null) {
+                player = this.plugin.getServer().getOfflinePlayer(UUID.fromString(p));
+            }
+            this.players.add(player);
         }
+        System.out.println(this.players.toString());
     }
 }
