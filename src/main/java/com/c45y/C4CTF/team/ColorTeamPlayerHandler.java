@@ -41,6 +41,9 @@ public class ColorTeamPlayerHandler implements Listener {
         if( this.team.config.containsPlayer(event.getPlayer())) {
             event.setRespawnLocation(this.team.config.getSpawn());
             event.getPlayer().getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.team.getColor().getData()));
+            for (ItemStack item: this.team.config.respawnKit) {
+                event.getPlayer().getInventory().addItem(item);
+            }
         }
     }
     

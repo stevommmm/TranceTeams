@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -26,12 +27,14 @@ public class ColorTeamConfiguration {
     
     public int respawnDelay;
     public int assetHardness;
+    public List<ItemStack> respawnKit;
     
     public ColorTeamConfiguration(C4CTF plugin, ColorTeam team) {
         this.team = team;
         this.plugin = plugin;
         this.respawnDelay = plugin.getConfig().getInt("respawnDelay");
         this.assetHardness = plugin.getConfig().getInt("assetHardness");
+        this.respawnKit = (List<ItemStack>)plugin.getConfig().get("respawnKit");
     }
     
     public Location getSpawn() {
@@ -40,6 +43,7 @@ public class ColorTeamConfiguration {
 
     public void setSpawn(Location spawn) {
         this.spawn = spawn;
+        this.toConfig();
     }
 
     public Location getAsset() {
@@ -48,10 +52,12 @@ public class ColorTeamConfiguration {
 
     public void setAsset(Location asset) {
         this.asset = asset;
+        this.toConfig();
     }
        
     public void addPlayer(OfflinePlayer player) {
         this.players.add(player);
+        this.toConfig();
     }
     
     public boolean containsPlayer(OfflinePlayer player) {
@@ -62,7 +68,17 @@ public class ColorTeamConfiguration {
         return this.players;
     }
     
+    public void reset() {
+        this.players.clear();
+        this.team.scoreboard.setScore(0);
+        this.toConfig();
+    }
+    
     public void toConfig() {
+        if (this.spawn == null || this.asset == null) {
+            return;
+        }
+        
         String configlocation = "persist." + this.team.getName();
         this.plugin.getConfig().set(configlocation + ".score", this.team.scoreboard.getScore());
         // Save spawn location
@@ -120,6 +136,5 @@ public class ColorTeamConfiguration {
             }
             this.players.add(player);
         }
-        System.out.println(this.players.toString());
     }
 }

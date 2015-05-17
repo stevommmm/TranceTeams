@@ -2,13 +2,16 @@ package com.c45y.C4CTF;
 
 import com.c45y.C4CTF.team.ColorTeam;
 import com.c45y.C4CTF.team.TeamManager;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -35,6 +38,24 @@ public class C4CTF extends JavaPlugin implements Listener {
         this.getConfig().options().copyDefaults(true);
         this.getConfig().addDefault("respawnDelay", 60);
         this.getConfig().addDefault("assetHardness", 10);
+        List<ItemStack> respawnKit = new ArrayList<ItemStack>();
+        
+        // Kit sword
+        ItemStack sword = new ItemStack(Material.IRON_SWORD, 1);
+        sword.addEnchantment(Enchantment.KNOCKBACK, 2);
+        sword.addEnchantment(Enchantment.DURABILITY, 3);
+        respawnKit.add(sword);
+        
+        // Kit bow
+        ItemStack bow = new ItemStack(Material.BOW, 1);
+        bow.addEnchantment(Enchantment.ARROW_INFINITE, 1);
+        bow.addEnchantment(Enchantment.DURABILITY, 3);
+        respawnKit.add(bow);
+        
+        // Single arrow for INF bow
+        respawnKit.add(new ItemStack(Material.ARROW, 1));
+        this.getConfig().addDefault("respawnKit", respawnKit);
+        
         this.saveConfig();
         
         this.scoreboard = this.getServer().getScoreboardManager().getNewScoreboard();
@@ -103,7 +124,7 @@ public class C4CTF extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("ctf")) {
             return true;
         }
-        else if (cmd.getName().equalsIgnoreCase("ctfadmin")) {
+        else if (cmd.getName().equalsIgnoreCase("ctfadmin") && sender.hasPermission("ctf.op")) {
             if (!(sender instanceof Player)) {
                 return true;
             }
@@ -124,6 +145,12 @@ public class C4CTF extends JavaPlugin implements Listener {
                     for (OfflinePlayer p: team.config.getPlayers()) {
                         this.getServer().broadcastMessage(team.getChatColor() + " - " + p.getName() + " (" + p.getUniqueId().toString() + ")");
                     }
+                }
+                return true;
+            }
+            else if (args[0].equalsIgnoreCase("reset")) {
+                for (ColorTeam team: this.teamManager.getTeams()) {
+                    team.config.reset();
                 }
                 return true;
             }
