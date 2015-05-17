@@ -61,7 +61,12 @@ public class ColorTeamConfiguration {
     }
     
     public boolean containsPlayer(OfflinePlayer player) {
-        return this.players.contains(player);
+        for (OfflinePlayer p: this.players) {
+            if(p.getUniqueId().toString().equalsIgnoreCase(player.getUniqueId().toString())) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public List<OfflinePlayer> getPlayers() {
