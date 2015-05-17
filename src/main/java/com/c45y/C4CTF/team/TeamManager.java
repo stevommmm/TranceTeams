@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.c45y.C4CTF;
+package com.c45y.C4CTF.team;
 
-import com.c45y.C4CTF.util.ColorMap;
+import com.c45y.C4CTF.C4CTF;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import org.bukkit.DyeColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.material.Wool;
 
@@ -32,7 +32,7 @@ public class TeamManager {
                 Wool w = new Wool();
                 w.setColor(DyeColor.valueOf(color));
                 ColorTeam team = new ColorTeam(this.plugin, w);
-                team.fromConfig();
+                team.config.fromConfig();
                 this.teams.put(w, team);
                 this.plugin.getLogger().info("Team " + color + " has been loaded!");
             }
@@ -41,7 +41,7 @@ public class TeamManager {
     
     public void persistTeams() {
         for( ColorTeam t: this.teams.values()) {
-            t.toConfig();
+            t.config.toConfig();
         }
     }
     
@@ -57,14 +57,22 @@ public class TeamManager {
         }
         return null;
     }
+    public ColorTeam getTeam(Player player) {
+        for( ColorTeam t: this.teams.values()) {
+            if (t.config.containsPlayer(player)) {
+                return t;
+            }
+        }
+        return null;
+    }
     
     public Collection<ColorTeam> getTeams() {
         return this.teams.values();
     }
     
-    public boolean inTeam(Player player) {
+    public boolean inTeam(OfflinePlayer player) {
         for( ColorTeam t: this.teams.values()) {
-            if (t.hasPlayer(player)) {
+            if (t.config.containsPlayer((OfflinePlayer)player)) {
                 return true;
             }
         }

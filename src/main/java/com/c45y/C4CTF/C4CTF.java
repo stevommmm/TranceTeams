@@ -1,12 +1,9 @@
 package com.c45y.C4CTF;
 
-import com.c45y.C4CTF.util.ColorMap;
-import java.util.EnumSet;
+import com.c45y.C4CTF.team.ColorTeam;
+import com.c45y.C4CTF.team.TeamManager;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -16,68 +13,89 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 
 
 public class C4CTF extends JavaPlugin implements Listener {
     
-    private TeamManager teamManager;
+    public TeamManager teamManager;
+    private Scoreboard scoreboard;
+    public Objective scoreboardObjective;
 
     @Override
     public void onEnable() {
         this.getConfig().options().copyDefaults(true);
-        this.getConfig().addDefault("misc", 1);
+        this.getConfig().addDefault("respawnDelay", 60);
+        this.getConfig().addDefault("assetHardness", 10);
+        this.saveConfig();
         
+        this.scoreboard = this.getServer().getScoreboardManager().getNewScoreboard();
+        this.scoreboardObjective = this.scoreboard.registerNewObjective("sidebar", "dummy");
+        this.scoreboardObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        this.scoreboardObjective.setDisplayName("Flag Captures");
+                
         this.teamManager = new TeamManager(this);
-        getServer().getPluginManager().registerEvents(this, this);
+        for (ColorTeam team: this.teamManager.getTeams()) {
+            this.getServer().getPluginManager().registerEvents(team.playerHandler, this);
+            team.respawnAssetBlock();
+        }
+        this.getServer().getPluginManager().registerEvents(this, this);
     }
 
     @Override
     public void onDisable() {
         this.teamManager.persistTeams();
     }
+    
+    public void updateScoreboard() {
+        for (Player p: this.getServer().getOnlinePlayers()) {
+            p.setScoreboard(this.scoreboard);
+        }
+    }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {      
+        event.getPlayer().setScoreboard(this.scoreboard);
+        
         if( event.getPlayer().hasPermission("ctf.op")) {
             return;
         }
         if (!this.teamManager.inTeam(event.getPlayer())) {
             ColorTeam team = this.teamManager.lowestTeam();
-            team.addPlayer(event.getPlayer());
-            this.getServer().broadcastMessage(team.getChatColor() + event.getPlayer().getName() + " has joined team " + team.getName());
-            
-            if (!event.getPlayer().hasPlayedBefore()) {
-                team.respawnPlayer(event.getPlayer());
+            if (team == null) {
+                return; // We havent created any teams yet
             }
+            team.config.addPlayer(event.getPlayer());
+            team.broadcast(event.getPlayer().getName() + " has joined team " + team.getName());
+            team.spawnPlayer(event.getPlayer());
         }
     }
-
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onBlockBreak(BlockBreakEvent event) {
-        for (ColorTeam team: this.teamManager.getTeams()) {
-            if( team.isAssetBlock(event.getBlock())) {
-                this.getServer().broadcastMessage(team.getChatColor() +
-                    "Team " + team.getName() + " has had their asset captured!"
-                );
-            }
+    
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryClick(InventoryClickEvent event) {
+        if( event.getWhoClicked().hasPermission("ctf.op")) {
+            return;
+        }
+        if (event.getSlot() == 39 /* Helmet slot */) {
+            event.setCancelled(true);
         }
     }
-
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onPlayerRespawn(PlayerRespawnEvent  event) {
-        for (ColorTeam team: this.teamManager.getTeams()) {
-            if( team.hasPlayer(event.getPlayer())) {
-                event.setRespawnLocation(team.getSpawn());
-            }
+    
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerChat(AsyncPlayerChatEvent  event) {
+        ColorTeam team = this.teamManager.getTeam(event.getPlayer());
+        if (team == null) {
+            return;
         }
+        event.getPlayer().setDisplayName(team.getChatColor() + event.getPlayer().getName() + ChatColor.RESET);
     }
 
     @Override
@@ -98,14 +116,16 @@ public class C4CTF extends JavaPlugin implements Listener {
             
             if (args[0].equalsIgnoreCase("save")) {
                 this.teamManager.persistTeams();
+                return true;
             }
             else if (args[0].equalsIgnoreCase("broadcast")) {
                 for (ColorTeam team: this.teamManager.getTeams()) {
                     this.getServer().broadcastMessage(team.getChatColor() + "Team " + team.getName() + " has " + team.countPlayers() + " players!");
-                    for (OfflinePlayer p: team.getPlayers()) {
+                    for (OfflinePlayer p: team.config.getPlayers()) {
                         this.getServer().broadcastMessage(team.getChatColor() + " - " + p.getName() + " (" + p.getUniqueId().toString() + ")");
                     }
                 }
+                return true;
             }
             
             // Decide what team we are interacting with
@@ -127,7 +147,7 @@ public class C4CTF extends JavaPlugin implements Listener {
                     player.sendMessage("Invalid team, do you need to \"/ctf create\" it first?");
                     return true;
                 }
-                team.setSpawn(player.getLocation());
+                team.config.setSpawn(player.getLocation());
                 player.sendMessage("Team " + team.getName() + " has had their spawn set!");
             }
             else if (args[0].equalsIgnoreCase("setasset")) {
@@ -141,7 +161,7 @@ public class C4CTF extends JavaPlugin implements Listener {
                     player.sendMessage("Please have a block in your crosshairs!");
                     return true;
                 }
-                team.setAsset(loc);
+                team.config.setAsset(loc);
                 player.sendMessage("Team " + team.getName() + " has had their asset set!");
             }
             return true;

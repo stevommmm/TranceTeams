@@ -3,79 +3,58 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.c45y.C4CTF;
+package com.c45y.C4CTF.team;
 
-import com.c45y.C4CTF.util.ColorMap;
+import com.c45y.C4CTF.C4CTF;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 
 /**
  *
  * @author c45y
  */
-public class ColorTeam {
+public class ColorTeamConfiguration {
     private C4CTF plugin;
-    private Wool color;
+    private ColorTeam team;
+    
     private Location spawn;
     private Location asset;
     private List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
     
-    public ColorTeam(C4CTF plugin, Wool color) {
+    public int respawnDelay;
+    public int assetHardness;
+    
+    public ColorTeamConfiguration(C4CTF plugin, ColorTeam team) {
+        this.team = team;
         this.plugin = plugin;
-        this.color = color;
-    }
-    
-    public Wool getColor() {
-        return this.color;
-    }
-    
-    public ChatColor getChatColor() {
-        return ColorMap.mapDyeChatColor.get(this.color.getColor());
-    }
-    
-    public String getName() {
-        return this.color.getColor().name();
-    }
-    
-    // Locations
-    
-    public void setAsset(Location location) {
-        this.asset = location;
-    }
-    
-    public Location getAsset() {
-        return this.asset;
-    }
-    
-    public boolean isAssetBlock(Block block) {
-        return block.getLocation().getX() == this.asset.getX() &&
-               block.getLocation().getY() == this.asset.getY() &&
-               block.getLocation().getZ() == this.asset.getZ();
-    }
-    
-    public void setSpawn(Location location) {
-        this.spawn = location;
+        this.respawnDelay = plugin.getConfig().getInt("respawnDelay");
+        this.assetHardness = plugin.getConfig().getInt("assetHardness");
     }
     
     public Location getSpawn() {
-        return this.spawn;
+        return spawn;
     }
-    
-    public void addPlayer(Player player) {
+
+    public void setSpawn(Location spawn) {
+        this.spawn = spawn;
+    }
+
+    public Location getAsset() {
+        return asset;
+    }
+
+    public void setAsset(Location asset) {
+        this.asset = asset;
+    }
+       
+    public void addPlayer(OfflinePlayer player) {
         this.players.add(player);
     }
     
-    public boolean hasPlayer(Player player) {
+    public boolean containsPlayer(OfflinePlayer player) {
         return this.players.contains(player);
     }
     
@@ -83,22 +62,9 @@ public class ColorTeam {
         return this.players;
     }
     
-    public void respawnPlayer(Player player) {
-        if (this.players.contains(player)) {
-            player.teleport(this.spawn);
-            player.getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.color.getData()));
-        }
-    }
-    
-    public int countPlayers() {
-        return this.players.size();
-    }
-    
-    // Team persistence
-    
     public void toConfig() {
-        String configlocation = "persist." + this.color.getColor().name();
-        
+        String configlocation = "persist." + this.team.getName();
+        this.plugin.getConfig().set(configlocation + ".score", this.team.scoreboard.getScore());
         // Save spawn location
         this.plugin.getConfig().set(configlocation + ".spawn.x", this.spawn.getX());
         this.plugin.getConfig().set(configlocation + ".spawn.y", this.spawn.getY());
@@ -121,9 +87,11 @@ public class ColorTeam {
     }
     
     public void fromConfig() {
-        String configlocation = "persist." + this.color.getColor().name();
+        String configlocation = "persist." + this.team.getName();
         
         this.plugin.reloadConfig();
+        
+        this.team.scoreboard.setScore(this.plugin.getConfig().getInt(configlocation + ".score"));
         
         // Load spawn location
         this.spawn = new Location(
