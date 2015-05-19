@@ -86,6 +86,7 @@ public class TeamManager {
         for( ColorTeam t: this.teams.values()) {
             if (t.countPlayers() < lowest) {
                 lowestTeam = t;
+		lowest = t.countPlayers();
             }
         } 
         
