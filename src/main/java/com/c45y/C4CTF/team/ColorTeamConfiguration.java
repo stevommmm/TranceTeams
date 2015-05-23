@@ -29,12 +29,18 @@ public class ColorTeamConfiguration {
     public int assetHardness;
     public List<ItemStack> respawnKit;
     
+    public boolean countKills;
+    public boolean countFlags;
+    
     public ColorTeamConfiguration(C4CTF plugin, ColorTeam team) {
         this.team = team;
         this.plugin = plugin;
         this.respawnDelay = plugin.getConfig().getInt("respawnDelay");
         this.assetHardness = plugin.getConfig().getInt("assetHardness");
         this.respawnKit = (List<ItemStack>)plugin.getConfig().get("respawnKit");
+        
+        this.countKills = plugin.getConfig().getBoolean("countKills");
+        this.countFlags = plugin.getConfig().getBoolean("countFlags");
     }
     
     public Location getSpawn() {

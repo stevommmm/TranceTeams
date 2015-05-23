@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -43,6 +44,18 @@ public class ColorTeamPlayerHandler implements Listener {
             event.getPlayer().getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.team.getColor().getData()));
             for (ItemStack item: this.team.config.respawnKit) {
                 event.getPlayer().getInventory().addItem(item);
+            }
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent  event) {
+        if( this.team.config.containsPlayer(event.getEntity())) {
+            if (event.getEntity().getKiller() instanceof Player) {
+                ColorTeam team = this.plugin.teamManager.getTeam(event.getEntity().getKiller());
+                if (team != null) {
+                    team.scoreboard.incrementScore();
+                }
             }
         }
     }
@@ -94,6 +107,9 @@ public class ColorTeamPlayerHandler implements Listener {
         if (event.getPlayer().hasPermission("ctf.op")) {
             return;
         }
+        if (!this.team.config.countFlags) {
+            return;
+        }
         Block b = event.getBlock();
         if( this.team.isAssetBlock(b)) {
             if (this.team.config.containsPlayer(event.getPlayer())){
@@ -134,6 +150,9 @@ public class ColorTeamPlayerHandler implements Listener {
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         if (event.getPlayer().hasPermission("ctf.op")) {
+            return;
+        }
+        if (!this.team.config.countFlags) {
             return;
         }
         

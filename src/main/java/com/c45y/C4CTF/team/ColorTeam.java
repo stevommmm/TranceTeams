@@ -81,6 +81,9 @@ public class ColorTeam {
         if( this.config.containsPlayer(player)) {
             player.teleport(this.config.getSpawn());
             player.getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.color.getData()));
+            for (ItemStack item: this.config.respawnKit) {
+                player.getInventory().addItem(item);
+            }
         }
     }
     

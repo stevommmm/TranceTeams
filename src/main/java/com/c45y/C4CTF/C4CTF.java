@@ -38,6 +38,8 @@ public class C4CTF extends JavaPlugin implements Listener {
         this.getConfig().options().copyDefaults(true);
         this.getConfig().addDefault("respawnDelay", 60);
         this.getConfig().addDefault("assetHardness", 10);
+        this.getConfig().addDefault("countKills", false);
+        this.getConfig().addDefault("countFlags", true);
         List<ItemStack> respawnKit = new ArrayList<ItemStack>();
         
         // Kit sword
@@ -61,7 +63,7 @@ public class C4CTF extends JavaPlugin implements Listener {
         this.scoreboard = this.getServer().getScoreboardManager().getNewScoreboard();
         this.scoreboardObjective = this.scoreboard.registerNewObjective("sidebar", "dummy");
         this.scoreboardObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        this.scoreboardObjective.setDisplayName("Flag Captures");
+        this.scoreboardObjective.setDisplayName("Team Score");
                 
         this.teamManager = new TeamManager(this);
         for (ColorTeam team: this.teamManager.getTeams()) {
