@@ -4,6 +4,7 @@ import com.c45y.C4CTF.team.ColorTeam;
 import com.c45y.C4CTF.team.TeamManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -35,7 +36,8 @@ public class C4CTF extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         this.getConfig().options().copyDefaults(true);
-        this.getConfig().addDefault("countKills", false);
+        this.getConfig().addDefault("worldJoinAssign", new String[] {"world"});
+        this.getConfig().addDefault("countKills", true);
         List<ItemStack> respawnKit = new ArrayList<ItemStack>();
         
         // Kit sword
@@ -55,6 +57,7 @@ public class C4CTF extends JavaPlugin implements Listener {
         this.getConfig().addDefault("respawnKit", respawnKit);
         
         this.saveConfig();
+        this.reloadConfig();
         
         this.scoreboard = this.getServer().getScoreboardManager().getNewScoreboard();
         this.scoreboardObjective = this.scoreboard.registerNewObjective("sidebar", "dummy");
@@ -82,14 +85,23 @@ public class C4CTF extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {      
         event.getPlayer().setScoreboard(this.scoreboard);
-        
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
         if( event.getPlayer().hasPermission("ctf.op")) {
+            getLogger().log(Level.INFO, "Player {0} has permission ctf.op", event.getPlayer().getName());
+            return;
+        }
+        if (!getConfig().getStringList("worldJoinAssign").contains(event.getPlayer().getWorld().getName())) {
+            getLogger().log(Level.INFO, "World {0} not found in configured worlds", event.getPlayer().getWorld().getName());
             return;
         }
         if (!this.teamManager.inTeam(event.getPlayer())) {
             ColorTeam team = this.teamManager.lowestTeam();
             if (team == null) {
-                return; // We havent created any teams yet
+                getLogger().log(Level.INFO, "No teams found when adding player {0}", event.getPlayer().getName());
+                return; // We probably havent created any teams yet
             }
             team.config.addPlayer(event.getPlayer());
             team.broadcast(event.getPlayer().getName() + " has joined team " + team.getName());
@@ -97,14 +109,12 @@ public class C4CTF extends JavaPlugin implements Listener {
         }
     }
     
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-        
-    }
-    
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if( event.getWhoClicked().hasPermission("ctf.op")) {
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
+        if (!this.teamManager.inTeam((OfflinePlayer) event.getWhoClicked())) {
             return;
         }
         if (event.getSlot() == 39 /* Helmet slot */) {
