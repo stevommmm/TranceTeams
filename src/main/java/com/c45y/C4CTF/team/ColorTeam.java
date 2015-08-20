@@ -9,8 +9,6 @@ import com.c45y.C4CTF.C4CTF;
 import com.c45y.C4CTF.util.ColorMap;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
@@ -54,28 +52,6 @@ public class ColorTeam {
     }
     
     // Locations   
-    public boolean isAssetBlock(Block block) {
-        return block.getLocation().getX() == this.config.getAsset().getX() &&
-               block.getLocation().getY() == this.config.getAsset().getY() &&
-               block.getLocation().getZ() == this.config.getAsset().getZ();
-    }
-    public void respawnAssetBlock() {
-        respawnAssetBlock(this.plugin.getServer().getWorlds().get(0));
-    }
-    public void respawnAssetBlock(World world) {
-        Block block = world.getBlockAt(this.config.getAsset());
-        block.setType(this.color.getItemType());
-        block.setData(this.color.getData());
-    }
-    public void scheduleRespawnAssetBlock(long delay) {
-        this.plugin.getServer().getScheduler().scheduleSyncDelayedTask(this.plugin, new Runnable() {
-            @Override
-            public void run() {
-                respawnAssetBlock();
-                broadcast("Team " + getName() + " asset has respawned!");
-            }
-        }, delay);
-    }
     
     public void spawnPlayer(Player player) {
         if( this.config.containsPlayer(player)) {

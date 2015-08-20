@@ -22,25 +22,18 @@ public class ColorTeamConfiguration {
     private ColorTeam team;
     
     private Location spawn;
-    private Location asset;
     private List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
     
-    public int respawnDelay;
-    public int assetHardness;
     public List<ItemStack> respawnKit;
     
     public boolean countKills;
-    public boolean countFlags;
     
     public ColorTeamConfiguration(C4CTF plugin, ColorTeam team) {
         this.team = team;
         this.plugin = plugin;
-        this.respawnDelay = plugin.getConfig().getInt("respawnDelay");
-        this.assetHardness = plugin.getConfig().getInt("assetHardness");
         this.respawnKit = (List<ItemStack>)plugin.getConfig().get("respawnKit");
         
         this.countKills = plugin.getConfig().getBoolean("countKills");
-        this.countFlags = plugin.getConfig().getBoolean("countFlags");
     }
     
     public Location getSpawn() {
@@ -49,15 +42,6 @@ public class ColorTeamConfiguration {
 
     public void setSpawn(Location spawn) {
         this.spawn = spawn;
-        this.toConfig();
-    }
-
-    public Location getAsset() {
-        return asset;
-    }
-
-    public void setAsset(Location asset) {
-        this.asset = asset;
         this.toConfig();
     }
        
@@ -83,10 +67,11 @@ public class ColorTeamConfiguration {
         this.players.clear();
         this.team.scoreboard.setScore(0);
         this.toConfig();
+        this.fromConfig();
     }
     
     public void toConfig() {
-        if (this.spawn == null || this.asset == null) {
+        if (this.spawn == null) {
             return;
         }
         
@@ -98,11 +83,6 @@ public class ColorTeamConfiguration {
         this.plugin.getConfig().set(configlocation + ".spawn.z", this.spawn.getZ());
         this.plugin.getConfig().set(configlocation + ".spawn.yaw", this.spawn.getYaw());
         this.plugin.getConfig().set(configlocation + ".spawn.pitch", this.spawn.getPitch());
-        
-        // Save asset location
-        this.plugin.getConfig().set(configlocation + ".asset.x", this.asset.getX());
-        this.plugin.getConfig().set(configlocation + ".asset.y", this.asset.getY());
-        this.plugin.getConfig().set(configlocation + ".asset.z", this.asset.getZ());
         
         // Save team member player lists
         List<String> plist = new ArrayList<String>();
@@ -130,15 +110,8 @@ public class ColorTeamConfiguration {
             (float)this.plugin.getConfig().getDouble(configlocation + ".spawn.pitch")
         );
         
-        // Load asset location
-        this.asset = new Location(
-            this.plugin.getServer().getWorlds().get(0),
-            this.plugin.getConfig().getDouble(configlocation + ".asset.x"),
-            this.plugin.getConfig().getDouble(configlocation + ".asset.y"),
-            this.plugin.getConfig().getDouble(configlocation + ".asset.z")
-        );
-        
         // Load our players
+        this.players.clear();
         List<String> plist = this.plugin.getConfig().getStringList(configlocation + ".players");
         for( String p: plist) {
             OfflinePlayer player = (OfflinePlayer) this.plugin.getServer().getPlayer(UUID.fromString(p));

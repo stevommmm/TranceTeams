@@ -3,10 +3,8 @@ package com.c45y.C4CTF;
 import com.c45y.C4CTF.team.ColorTeam;
 import com.c45y.C4CTF.team.TeamManager;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -18,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
@@ -36,10 +35,7 @@ public class C4CTF extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         this.getConfig().options().copyDefaults(true);
-        this.getConfig().addDefault("respawnDelay", 60);
-        this.getConfig().addDefault("assetHardness", 10);
         this.getConfig().addDefault("countKills", false);
-        this.getConfig().addDefault("countFlags", true);
         List<ItemStack> respawnKit = new ArrayList<ItemStack>();
         
         // Kit sword
@@ -68,7 +64,6 @@ public class C4CTF extends JavaPlugin implements Listener {
         this.teamManager = new TeamManager(this);
         for (ColorTeam team: this.teamManager.getTeams()) {
             this.getServer().getPluginManager().registerEvents(team.playerHandler, this);
-            team.respawnAssetBlock();
         }
         this.getServer().getPluginManager().registerEvents(this, this);
     }
@@ -102,6 +97,11 @@ public class C4CTF extends JavaPlugin implements Listener {
         }
     }
     
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+        
+    }
+    
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         if( event.getWhoClicked().hasPermission("ctf.op")) {
@@ -113,7 +113,7 @@ public class C4CTF extends JavaPlugin implements Listener {
     }
     
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerChat(AsyncPlayerChatEvent  event) {
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
         ColorTeam team = this.teamManager.getTeam(event.getPlayer());
         if (team == null) {
             return;
@@ -133,7 +133,7 @@ public class C4CTF extends JavaPlugin implements Listener {
             Player player = (Player) sender;
             
             if (args.length == 0) {
-                player.sendMessage("Missing required arguements. [create, setspawn, setasset]");
+                player.sendMessage("Missing required arguements. [create, setspawn, reset]");
                 return true;
             }
             
@@ -164,7 +164,6 @@ public class C4CTF extends JavaPlugin implements Listener {
                 return true;
             }
             Wool wool = (Wool) itemInHand.getData();
-            System.out.println(wool.toString());
             
             if (args[0].equalsIgnoreCase("create")) {
                 this.teamManager.addTeam(wool);
@@ -178,20 +177,6 @@ public class C4CTF extends JavaPlugin implements Listener {
                 }
                 team.config.setSpawn(player.getLocation());
                 player.sendMessage("Team " + team.getName() + " has had their spawn set!");
-            }
-            else if (args[0].equalsIgnoreCase("setasset")) {
-                ColorTeam team = this.teamManager.getTeam(wool);
-                if (team == null) {
-                    player.sendMessage("Invalid team, do you need to \"/ctf create\" it first?");
-                    return true;
-                }
-                Location loc = player.getTargetBlock((HashSet<Byte>) null, 4).getLocation();
-                if (loc == null) {
-                    player.sendMessage("Please have a block in your crosshairs!");
-                    return true;
-                }
-                team.config.setAsset(loc);
-                player.sendMessage("Team " + team.getName() + " has had their asset set!");
             }
             return true;
         }
