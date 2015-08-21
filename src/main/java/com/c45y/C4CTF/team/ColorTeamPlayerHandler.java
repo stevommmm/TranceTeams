@@ -6,20 +6,17 @@
 package com.c45y.C4CTF.team;
 
 import com.c45y.C4CTF.C4CTF;
+import java.util.logging.Level;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -37,8 +34,12 @@ public class ColorTeamPlayerHandler implements Listener {
         this.team = team;
     }
     
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onPlayerRespawn(PlayerRespawnEvent  event) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        if (!plugin.inMonitoredWorld(event.getPlayer().getWorld())) {
+            plugin.getLogger().log(Level.INFO, "World {0} not found in configured worlds", event.getPlayer().getWorld().getName());
+            return;
+        }
         if( this.team.config.containsPlayer(event.getPlayer())) {
             event.setRespawnLocation(this.team.config.getSpawn());
             event.getPlayer().getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.team.getColor().getData()));
@@ -48,13 +49,13 @@ public class ColorTeamPlayerHandler implements Listener {
         }
     }
     
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onPlayerDeath(PlayerDeathEvent  event) {
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
         if( this.team.config.containsPlayer(event.getEntity())) {
             if (event.getEntity().getKiller() instanceof Player) {
-                ColorTeam team = this.plugin.teamManager.getTeam(event.getEntity().getKiller());
-                if (team != null) {
-                    team.scoreboard.incrementScore();
+                ColorTeam iteam = this.plugin.teamManager.getTeam(event.getEntity().getKiller());
+                if (iteam != null) {
+                    iteam.scoreboard.incrementScore();
                 }
             }
         }

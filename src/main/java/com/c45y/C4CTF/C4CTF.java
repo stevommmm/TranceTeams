@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -81,30 +82,53 @@ public class C4CTF extends JavaPlugin implements Listener {
             p.setScoreboard(this.scoreboard);
         }
     }
+    
+    public boolean inMonitoredWorld(World world) {
+        return getConfig().getStringList("worldJoinAssign").contains(world.getName());
+    }
+    
+    public ColorTeam tryAssignToTeam(Player player) {
+        if( player.hasPermission("ctf.op")) {
+            getLogger().log(Level.INFO, "Player {0} has permission ctf.op", player.getName());
+            return null;
+        }
+        if (!this.teamManager.inTeam(player)) {
+            ColorTeam team = this.teamManager.lowestTeam();
+            if (team == null) {
+                getLogger().log(Level.INFO, "No teams found when adding player {0}", player.getName());
+                return null; // We probably havent created any teams yet
+            }
+            team.config.addPlayer(player);
+            team.broadcast(player.getName() + " has joined team " + team.getName());
+            team.spawnPlayer(player);
+            return team;
+        } else {
+            return this.teamManager.getTeam(player);
+        } 
+    }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {      
-        event.getPlayer().setScoreboard(this.scoreboard);
+        updateScoreboard();
+        
+        if (!inMonitoredWorld(event.getPlayer().getWorld())) {
+            getLogger().log(Level.INFO, "World {0} not found in configured worlds", event.getPlayer().getWorld().getName());
+            return;
+        }
+        ColorTeam team = tryAssignToTeam(event.getPlayer());
+        if (!event.getPlayer().hasPlayedBefore()) {
+            team.spawnPlayer(event.getPlayer());
+        }
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-        if( event.getPlayer().hasPermission("ctf.op")) {
-            getLogger().log(Level.INFO, "Player {0} has permission ctf.op", event.getPlayer().getName());
-            return;
-        }
-        if (!getConfig().getStringList("worldJoinAssign").contains(event.getPlayer().getWorld().getName())) {
+        if (!inMonitoredWorld(event.getPlayer().getWorld())) {
             getLogger().log(Level.INFO, "World {0} not found in configured worlds", event.getPlayer().getWorld().getName());
             return;
         }
-        if (!this.teamManager.inTeam(event.getPlayer())) {
-            ColorTeam team = this.teamManager.lowestTeam();
-            if (team == null) {
-                getLogger().log(Level.INFO, "No teams found when adding player {0}", event.getPlayer().getName());
-                return; // We probably havent created any teams yet
-            }
-            team.config.addPlayer(event.getPlayer());
-            team.broadcast(event.getPlayer().getName() + " has joined team " + team.getName());
+        ColorTeam team = tryAssignToTeam(event.getPlayer());
+        if (team != null) {
             team.spawnPlayer(event.getPlayer());
         }
     }
@@ -143,7 +167,7 @@ public class C4CTF extends JavaPlugin implements Listener {
             Player player = (Player) sender;
             
             if (args.length == 0) {
-                player.sendMessage("Missing required arguements. [create, setspawn, reset]");
+                player.sendMessage("Missing required arguements. [create, setspawn, reset, broadcast, save]");
                 return true;
             }
             

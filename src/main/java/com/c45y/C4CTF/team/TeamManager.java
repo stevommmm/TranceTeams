@@ -8,6 +8,7 @@ package com.c45y.C4CTF.team;
 import com.c45y.C4CTF.C4CTF;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.logging.Level;
 import org.bukkit.DyeColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -34,7 +35,7 @@ public class TeamManager {
                 ColorTeam team = new ColorTeam(this.plugin, w);
                 team.config.fromConfig();
                 this.teams.put(w, team);
-                this.plugin.getLogger().info("Team " + color + " has been loaded!");
+                this.plugin.getLogger().log(Level.INFO, "Team {0} has been loaded!", color);
             }
         }
     }
