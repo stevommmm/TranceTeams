@@ -1,6 +1,7 @@
 name: TranceTeams
 main: com.c45y.tranceteams.TranceTeams
 version: 0.1
+softdepend: [Multiverse-Core]
 permissions:
     tranceteams.user:
         description: A player
