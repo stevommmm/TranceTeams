@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>C4CTF</groupId>
-    <artifactId>C4CTF</artifactId>
+    <artifactId>TranceTeams</artifactId>
     <version>1.0</version>
-    <name>C4CTF</name>
+    <name>TranceTeams</name>
     <url>http://c45y.com/</url>
     <repositories>
         <repository>

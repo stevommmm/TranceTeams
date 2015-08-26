@@ -3,32 +3,33 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.c45y.C4CTF.team;
+package com.c45y.tranceteams.team;
 
-import com.c45y.C4CTF.C4CTF;
-import com.c45y.C4CTF.util.ColorMap;
+import com.c45y.tranceteams.TranceTeams;
+import com.c45y.tranceteams.util.ColorMap;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
+import org.bukkit.scoreboard.Team;
 
 /**
  *
  * @author c45y
  */
 public class ColorTeam {
-    private C4CTF plugin;
+    private TranceTeams plugin;
     private Wool color;
     
-    public ColorTeamPlayerHandler playerHandler;
     public ColorTeamConfiguration config;
     public ColorTeamScoreboard scoreboard;
+    private Team scoreboardTeam;
     
-    public ColorTeam(C4CTF plugin, Wool color) {
+    public ColorTeam(TranceTeams plugin, Wool color) {
         this.plugin = plugin;
         this.color = color;
-        this.playerHandler = new ColorTeamPlayerHandler(plugin, this);
         this.config = new ColorTeamConfiguration(plugin, this);
         
         // Set up scoreboard teams;
@@ -51,11 +52,9 @@ public class ColorTeam {
         return this.color.getColor().name();
     }
     
-    // Locations   
-    
     public void spawnPlayer(Player player) {
         if( this.config.containsPlayer(player)) {
-            player.teleport(this.config.getSpawn());
+            player.teleport(this.config.getSpawn(), TeleportCause.PLUGIN);
             player.getInventory().setHelmet(new ItemStack(Material.WOOL, 1, this.color.getData()));
             for (ItemStack item: this.config.respawnKit) {
                 player.getInventory().addItem(item);

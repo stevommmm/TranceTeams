@@ -1,11 +1,10 @@
-package com.c45y.C4CTF;
+package com.c45y.tranceteams;
 
-import com.c45y.C4CTF.team.ColorTeam;
-import com.c45y.C4CTF.team.TeamManager;
+import com.c45y.tranceteams.team.ColorTeam;
+import com.c45y.tranceteams.team.TeamManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -13,13 +12,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,12 +19,12 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
-
-public class C4CTF extends JavaPlugin implements Listener {
+public class TranceTeams extends JavaPlugin {
     
     public TeamManager teamManager;
-    private Scoreboard scoreboard;
+    public Scoreboard scoreboard;
     public Objective scoreboardObjective;
+   
 
     @Override
     public void onEnable() {
@@ -66,10 +58,7 @@ public class C4CTF extends JavaPlugin implements Listener {
         this.scoreboardObjective.setDisplayName("Team Score");
                 
         this.teamManager = new TeamManager(this);
-        for (ColorTeam team: this.teamManager.getTeams()) {
-            this.getServer().getPluginManager().registerEvents(team.playerHandler, this);
-        }
-        this.getServer().getPluginManager().registerEvents(this, this);
+        this.getServer().getPluginManager().registerEvents(new TranceListener(this), this);
     }
 
     @Override
@@ -107,60 +96,12 @@ public class C4CTF extends JavaPlugin implements Listener {
         } 
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent event) {      
-        updateScoreboard();
-        
-        if (!inMonitoredWorld(event.getPlayer().getWorld())) {
-            getLogger().log(Level.INFO, "World {0} not found in configured worlds", event.getPlayer().getWorld().getName());
-            return;
-        }
-        ColorTeam team = tryAssignToTeam(event.getPlayer());
-        if (!event.getPlayer().hasPlayedBefore()) {
-            team.spawnPlayer(event.getPlayer());
-        }
-    }
-    
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
-        if (!inMonitoredWorld(event.getPlayer().getWorld())) {
-            getLogger().log(Level.INFO, "World {0} not found in configured worlds", event.getPlayer().getWorld().getName());
-            return;
-        }
-        ColorTeam team = tryAssignToTeam(event.getPlayer());
-        if (team != null) {
-            team.spawnPlayer(event.getPlayer());
-        }
-    }
-    
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) {
-            return;
-        }
-        if (!this.teamManager.inTeam((OfflinePlayer) event.getWhoClicked())) {
-            return;
-        }
-        if (event.getSlot() == 39 /* Helmet slot */) {
-            event.setCancelled(true);
-        }
-    }
-    
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        ColorTeam team = this.teamManager.getTeam(event.getPlayer());
-        if (team == null) {
-            return;
-        }
-        event.getPlayer().setDisplayName(team.getChatColor() + event.getPlayer().getName() + ChatColor.RESET);
-    }
-
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("ctf")) {
+        if (cmd.getName().equalsIgnoreCase("team")) {
             return true;
         }
-        else if (cmd.getName().equalsIgnoreCase("ctfadmin") && sender.hasPermission("ctf.op")) {
+        else if (cmd.getName().equalsIgnoreCase("teamadmin") && sender.hasPermission("tranceteams.op")) {
             if (!(sender instanceof Player)) {
                 return true;
             }
@@ -206,7 +147,7 @@ public class C4CTF extends JavaPlugin implements Listener {
             else if (args[0].equalsIgnoreCase("setspawn")) {
                 ColorTeam team = this.teamManager.getTeam(wool);
                 if (team == null) {
-                    player.sendMessage("Invalid team, do you need to \"/ctf create\" it first?");
+                    player.sendMessage("Invalid team, do you need to \"/teamadmin create\" it first?");
                     return true;
                 }
                 team.config.setSpawn(player.getLocation());

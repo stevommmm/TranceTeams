@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.c45y.C4CTF.util;
+package com.c45y.tranceteams.util;
 
 import java.util.HashMap;
 import org.bukkit.ChatColor;

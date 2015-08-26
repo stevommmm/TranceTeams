@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.c45y.C4CTF.team;
+package com.c45y.tranceteams.team;
 
-import com.c45y.C4CTF.C4CTF;
+import com.c45y.tranceteams.TranceTeams;
 import org.bukkit.scoreboard.Team;
 
 /**
@@ -13,16 +13,14 @@ import org.bukkit.scoreboard.Team;
  * @author c45y
  */
 public class ColorTeamScoreboard {
-    private C4CTF plugin;
+    private TranceTeams plugin;
     private ColorTeam team;
-    private Team scoreboardTeam;
     private int score = 0;
     
-    public ColorTeamScoreboard(C4CTF plugin, ColorTeam team) {
+    public ColorTeamScoreboard(TranceTeams plugin, ColorTeam team) {
         this.plugin = plugin;
         this.team = team;
     }
-
     
     public int getScore() {
         return this.score;

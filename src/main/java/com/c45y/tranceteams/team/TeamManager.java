@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.c45y.C4CTF.team;
+package com.c45y.tranceteams.team;
 
-import com.c45y.C4CTF.C4CTF;
+import com.c45y.tranceteams.TranceTeams;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -19,10 +19,10 @@ import org.bukkit.material.Wool;
  * @author c45y
  */
 public class TeamManager {
-    private C4CTF plugin;
+    private TranceTeams plugin;
     private HashMap<Wool, ColorTeam> teams = new HashMap<Wool, ColorTeam>();
     
-    public TeamManager(C4CTF plugin) {
+    public TeamManager(TranceTeams plugin) {
         this.plugin = plugin;
         this.populateTeams();
     }

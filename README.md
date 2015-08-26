@@ -1,7 +1,7 @@
-C4 CTF
+TranceTeams
 -------
 
-C4's CTF is a simple capture the flag plugin for post 1.8 servers.
+TranceTeams is a team pvp plugin for post 1.8 servers.
 
 Team creation is fully dynamic and scores persist across restarts. A scoreboard shows live team scores. New players will be placed in the least populated team on join, as well as receive a fancy wool block hat based on their team color.
 
@@ -9,19 +9,19 @@ Team creation is fully dynamic and scores persist across restarts. A scoreboard 
 
 ### Permissions
 
-- `ctf.user`	Nearly every user playing the game
-- `ctf.op`	Gives access to /ctfadmin commands
+- `tranceteams.user`	Nearly every user playing the game
+- `tranceteams.op`	Gives access to /teamadmin commands
 
 ### Administration
 
-- `/ctfadmin broadcast`	A debug command, showing all created teams and members
-- `/ctfadmin save`	Force all CTF teams to persist to config. Should only ever be run after using *setspawn* and *setasset*
+- `/teamadmin broadcast`	A debug command, showing all created teams and members
+- `/teamadmin save`	Force all teams to persist to config. Should only ever be run after using *setspawn* and *setasset*
 
 The following commands must be run while holding the color wool block of the team you wish to modify in your hand
 
-- `/ctfadmin create`	Create a new CTF team
-- `/ctfadmin setspawn`	Set the team spawn for a CTF team
-- `/ctfadmin setasset`	Set the asset for the color wool block in hand, your cursor should be focuses on the block you wish to use
+- `/teamadmin create`	Create a new team
+- `/teamadmin setspawn`	Set the team spawn for a team
+- `/teamadmin setasset`	Set the asset for the color wool block in hand, your cursor should be focuses on the block you wish to use
 
 ### Configuration Options
 

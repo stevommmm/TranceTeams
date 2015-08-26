@@ -1,21 +1,21 @@
-name: C4CTF
-main: com.c45y.C4CTF.C4CTF
+name: TranceTeams
+main: com.c45y.tranceteams.TranceTeams
 version: 0.1
 permissions:
-    ctf.user:
+    tranceteams.user:
         description: A player
         default: true
-    ctf.op:
+    tranceteams.op:
         description: A admin type player
         default: op
 commands:
-  ctf:
+  team:
     description: Basic command
-    permission: ctf.user
+    permission: tranceteams.user
     usage: |
-           /ctf: [one, two]
-  ctfadmin:
+           /team: [one, two]
+  teamadmin:
     description: Basic admin command
-    permission: ctf.op
+    permission: tranceteams.op
     usage: |
-           /ctfadmin: [one, two]
+           /teamadmin: [one, two]
