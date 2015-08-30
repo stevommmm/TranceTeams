@@ -5,6 +5,7 @@
  */
 package com.c45y.tranceteams;
 
+import com.c45y.tranceteams.flag.BlockFlag;
 import com.c45y.tranceteams.team.ColorTeam;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
@@ -15,11 +16,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
@@ -171,5 +174,32 @@ public class TranceListener implements Listener {
             return;
         }
         event.getPlayer().setDisplayName(team.getChatColor() + event.getPlayer().getName() + ChatColor.RESET);
+    }
+    
+    
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        
+        BlockFlag flag = _plugin.flagManager.getFlag(event.getClickedBlock().getLocation());
+        if (flag == null) {
+            return;
+        }
+        
+        if (!flag.isClaimable()) {
+            return;
+        }
+        flag.setClaimable(false);
+        
+        ColorTeam team = _plugin.teamManager.getTeam(event.getPlayer());
+        if (team == null) {
+            return;
+        }
+        
+        for (Player p: team.getOnlinePlayers()) {
+            p.addPotionEffects(flag.getEffects());
+        }
     }
 }

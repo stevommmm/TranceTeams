@@ -1,5 +1,6 @@
 package com.c45y.tranceteams;
 
+import com.c45y.tranceteams.flag.FlagManager;
 import com.c45y.tranceteams.team.ColorTeam;
 import com.c45y.tranceteams.team.TeamManager;
 import java.util.ArrayList;
@@ -20,14 +21,17 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 
 public class TranceTeams extends JavaPlugin {
-    
+    private static TranceTeams _this;
     public TeamManager teamManager;
+    public FlagManager flagManager;
     public Scoreboard scoreboard;
     public Objective scoreboardObjective;
    
 
     @Override
     public void onEnable() {
+        _this = this;
+        
         this.getConfig().options().copyDefaults(true);
         this.getConfig().addDefault("worldJoinAssign", new String[] {"world"});
         this.getConfig().addDefault("countKills", true);
@@ -58,12 +62,19 @@ public class TranceTeams extends JavaPlugin {
         this.scoreboardObjective.setDisplayName("Team Score");
                 
         this.teamManager = new TeamManager(this);
+        this.flagManager = new FlagManager(this);
+
         this.getServer().getPluginManager().registerEvents(new TranceListener(this), this);
+        
     }
 
     @Override
     public void onDisable() {
         this.teamManager.persistTeams();
+    }
+    
+    public static TranceTeams getInstance() {
+        return _this;
     }
     
     public void updateScoreboard() {
