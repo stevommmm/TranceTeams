@@ -6,7 +6,9 @@
 package com.c45y.tranceteams.flag;
 
 import com.c45y.tranceteams.TranceTeams;
+import java.util.Collection;
 import java.util.HashMap;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 /**
@@ -24,12 +26,17 @@ public class FlagManager {
     }
     
     public void populate() {
-        if (_plugin.getConfig().contains("persist")) {
-            for( String flagname : _plugin.getConfig().getConfigurationSection("flagpersist").getKeys(false)) {
-                BlockFlag flag = BlockFlag.fromConfig(flagname);
+        if (_plugin.getConfig().contains("flagpersist")) {
+            Collection<BlockFlag> flags = (Collection<BlockFlag>) _plugin.getConfig().get("flagpersist");
+            for (BlockFlag flag: flags) {
                 _flags.put(flag.getLocation(), flag);
             }
         }
+    }
+    
+    public void persist() {
+        _plugin.getConfig().set("flagpersist", _flags.values());
+        _plugin.saveConfig();
     }
     
     public BlockFlag getFlag(Location location) {

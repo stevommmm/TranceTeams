@@ -1,5 +1,6 @@
 package com.c45y.tranceteams;
 
+import com.c45y.tranceteams.flag.BlockFlag;
 import com.c45y.tranceteams.flag.FlagManager;
 import com.c45y.tranceteams.team.ColorTeam;
 import com.c45y.tranceteams.team.TeamManager;
@@ -11,6 +12,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,6 +33,9 @@ public class TranceTeams extends JavaPlugin {
     @Override
     public void onEnable() {
         _this = this;
+        
+        ConfigurationSerialization.registerClass(BlockFlag.class, "BlockFlag");
+        
         
         this.getConfig().options().copyDefaults(true);
         this.getConfig().addDefault("worldJoinAssign", new String[] {"world"});
@@ -71,6 +76,7 @@ public class TranceTeams extends JavaPlugin {
     @Override
     public void onDisable() {
         this.teamManager.persistTeams();
+        this.flagManager.persist();
     }
     
     public static TranceTeams getInstance() {
@@ -112,7 +118,19 @@ public class TranceTeams extends JavaPlugin {
         if (cmd.getName().equalsIgnoreCase("team")) {
             return true;
         }
-        else if (cmd.getName().equalsIgnoreCase("teamadmin") && sender.hasPermission("tranceteams.op")) {
+        else if (cmd.getName().equalsIgnoreCase("flagadmin") && sender.hasPermission("tranceteams.op")) {
+            if (!(sender instanceof Player)) {
+                return true;
+            }
+            Player player = (Player) sender;
+            if (args.length == 0) {
+                player.sendMessage("Missing required arguements. [create, remove, list, save]");
+                return true;
+            }
+            
+            
+            
+        } else if (cmd.getName().equalsIgnoreCase("teamadmin") && sender.hasPermission("tranceteams.op")) {
             if (!(sender instanceof Player)) {
                 return true;
             }
