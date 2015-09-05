@@ -8,7 +8,7 @@ package com.c45y.tranceteams.flag;
 import com.c45y.tranceteams.TranceTeams;
 import java.util.Collection;
 import java.util.HashMap;
-import org.bukkit.Bukkit;
+import java.util.List;
 import org.bukkit.Location;
 
 /**
@@ -35,8 +35,12 @@ public class FlagManager {
     }
     
     public void persist() {
-        _plugin.getConfig().set("flagpersist", _flags.values());
+        _plugin.getConfig().set("flagpersist", _flags.values().toArray());
         _plugin.saveConfig();
+    }
+    
+    public void addFlag(BlockFlag flag) {
+        _flags.put(flag.getLocation(), flag);
     }
     
     public BlockFlag getFlag(Location location) {
@@ -44,5 +48,13 @@ public class FlagManager {
             return _flags.get(location);
         }
         return null;
+    }
+    
+    public Collection<BlockFlag> getFlags() {
+        return _flags.values();
+    }
+    
+    public void removeFlag(BlockFlag flag) {
+        _flags.remove(flag.getLocation());
     }
 }

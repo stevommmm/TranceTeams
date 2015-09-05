@@ -5,11 +5,15 @@ import com.c45y.tranceteams.flag.FlagManager;
 import com.c45y.tranceteams.team.ColorTeam;
 import com.c45y.tranceteams.team.TeamManager;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
@@ -18,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -126,6 +131,39 @@ public class TranceTeams extends JavaPlugin {
             if (args.length == 0) {
                 player.sendMessage("Missing required arguements. [create, remove, list, save]");
                 return true;
+            }
+            if (args[0].equalsIgnoreCase("create")) {
+                if (args.length != 2) {
+                    player.sendMessage("Missing args, /create <name>");
+                    return true;
+                }
+                List<Block> blocks = player.getLineOfSight((HashSet<Material>) null, 4);
+                if (blocks.isEmpty()) {
+                    player.sendMessage("You need to be looking at a block");
+                    return true;
+                }
+                Location location = blocks.get(0).getLocation();
+                this.flagManager.addFlag(new BlockFlag(args[1], location, player.getActivePotionEffects()));
+                player.sendMessage(String.format("Flag created at %f, %f, %f with buffs:", new Object[] {location.getX(), location.getY(), location.getZ()}));
+                for (PotionEffect effect: player.getActivePotionEffects()) {
+                    player.sendMessage(" - " + effect.getType().getName() + ", duration:" + effect.getDuration());
+                }
+                return true;
+            } else if (args[0].equalsIgnoreCase("remove")) {
+                
+            } else if (args[0].equalsIgnoreCase("list")) {
+                for (BlockFlag flag: this.flagManager.getFlags()) {
+                    player.sendMessage(String.format("Flag %s at %f, %f, %f with buffs:", new Object[] {flag.getName(), flag.getLocation().getX(), flag.getLocation().getY(), flag.getLocation().getZ()}));
+                    for (PotionEffect effect: flag.getEffects()) {
+                        player.sendMessage(" - " + effect.getType().getName() + ", duration:" + effect.getDuration());
+                    }
+                }
+                return true;
+            } else if (args[0].equalsIgnoreCase("save")) {
+                this.flagManager.persist();
+                return true;
+            } else {
+                player.sendMessage("Unknown command");
             }
             
             

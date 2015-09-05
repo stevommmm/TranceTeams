@@ -6,6 +6,7 @@
 package com.c45y.tranceteams.flag;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +28,15 @@ public class BlockFlag implements ConfigurationSerializable {
     private boolean _isClaimable;
     
     public BlockFlag(String name, Location location) {
-        _name = name;
-        _location = location;
-        _effects = new ArrayList<PotionEffect>();
-        _isClaimable = true;
+        this(name, location, new ArrayList<PotionEffect>(), true);
+    }
+    
+    public BlockFlag(String name, Location location, List<PotionEffect> effects) {
+        this(name, location, effects, true);
+    }
+    
+    public BlockFlag(String name, Location location, Collection<PotionEffect> effects) {
+        this(name, location, new ArrayList(effects), true);
     }
     
     public BlockFlag(String name, Location location, List<PotionEffect> effects, boolean claimable) {
@@ -83,8 +89,8 @@ public class BlockFlag implements ConfigurationSerializable {
         if (world == null) {
             throw new IllegalArgumentException("unknown world");
         }
-        Location location = new Location(world, Double.parseDouble((String) args.get("x")), Double.parseDouble((String) args.get("y")), Double.parseDouble((String) args.get("z")));
+        Location location = new Location(world, (Double) args.get("x"), (Double) args.get("y"), (Double) args.get("z"));
         //String name, Location location, List<PotionEffect> effects, boolean claimable
-        return new BlockFlag((String) args.get("name"), location, (List<PotionEffect>) args.get("effects"), Boolean.parseBoolean((String) args.get("claimable")));
+        return new BlockFlag((String) args.get("name"), location, (List<PotionEffect>) args.get("effects"), (Boolean) args.get("claimable"));
     }
 }

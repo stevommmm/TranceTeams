@@ -16,7 +16,8 @@ commands:
     usage: |
            /team: [one, two]
   teamadmin:
-    description: Basic admin command
+    description: Team admin command
     permission: tranceteams.op
-    usage: |
-           /teamadmin: [one, two]
+  flagadmin:
+    description: Flag admin command
+    permission: tranceteams.op
