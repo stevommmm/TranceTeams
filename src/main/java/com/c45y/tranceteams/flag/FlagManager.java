@@ -8,8 +8,14 @@ package com.c45y.tranceteams.flag;
 import com.c45y.tranceteams.TranceTeams;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -23,9 +29,26 @@ public class FlagManager {
         _plugin = plugin;
         _flags = new HashMap<Location, BlockFlag>();
         populate();
+        
+        for (final BlockFlag flag: _flags.values()) {
+            _plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    World w = flag.getLocation().getWorld();
+                    ExperienceOrb orb = w.spawn(flag.getLocation(), ExperienceOrb.class);
+                    for (Entity e: orb.getNearbyEntities(40D, 40D, 40D)) {
+                        if (e.getType() == EntityType.PLAYER) {
+                            w.strikeLightningEffect(e.getLocation());
+                            ((Player) e).setVelocity(new Vector(0, 3, 0));
+                        }
+                    }
+                    _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + " has respawned!");
+                }
+            }, 360 * 20, flag.getClaimWait());
+        }
     }
     
-    public void populate() {
+    public final void populate() {
         if (_plugin.getConfig().contains("flagpersist")) {
             Collection<BlockFlag> flags = (Collection<BlockFlag>) _plugin.getConfig().get("flagpersist");
             for (BlockFlag flag: flags) {

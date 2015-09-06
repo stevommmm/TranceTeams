@@ -191,7 +191,7 @@ public class TranceListener implements Listener {
         if (!flag.isClaimable()) {
             return;
         }
-        flag.setClaimable(false);
+        flag.toggleClaimable();
         
         ColorTeam team = _plugin.teamManager.getTeam(event.getPlayer());
         if (team == null) {

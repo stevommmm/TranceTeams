@@ -25,25 +25,25 @@ public class BlockFlag implements ConfigurationSerializable {
     private String _name;
     private Location _location;
     List<PotionEffect> _effects;
-    private boolean _isClaimable;
+    private long _lastClaimed;
     
     public BlockFlag(String name, Location location) {
-        this(name, location, new ArrayList<PotionEffect>(), true);
+        this(name, location, new ArrayList<PotionEffect>());
     }
     
     public BlockFlag(String name, Location location, List<PotionEffect> effects) {
-        this(name, location, effects, true);
+        this(name, location, effects, System.currentTimeMillis());
     }
     
     public BlockFlag(String name, Location location, Collection<PotionEffect> effects) {
-        this(name, location, new ArrayList(effects), true);
+        this(name, location, new ArrayList(effects), System.currentTimeMillis());
     }
     
-    public BlockFlag(String name, Location location, List<PotionEffect> effects, boolean claimable) {
+    public BlockFlag(String name, Location location, List<PotionEffect> effects, long lastClaimed) {
         _name = name;
         _location = location;
         _effects = effects;
-        _isClaimable = claimable;
+        _lastClaimed = lastClaimed;
     }
     
     
@@ -60,11 +60,16 @@ public class BlockFlag implements ConfigurationSerializable {
     }
     
     public boolean isClaimable() {
-        return _isClaimable;
+        return System.currentTimeMillis() > _lastClaimed;
     }
     
-    public void setClaimable(boolean state) {
-        _isClaimable = state;
+    public long getClaimWait() {
+        long delay = System.currentTimeMillis() - _lastClaimed;
+        return delay > 0 ? delay : 0L;
+    }
+    
+    public void toggleClaimable() {
+        _lastClaimed = System.currentTimeMillis();
     }
     
     public boolean isFlag(Location location) {
@@ -80,7 +85,7 @@ public class BlockFlag implements ConfigurationSerializable {
         data.put("y", _location.getY());
         data.put("z", _location.getZ());
         data.put("effects", _effects);
-        data.put("claimable", _isClaimable);
+        data.put("lastclaimed", _lastClaimed);
         return data;
     }
     
@@ -91,6 +96,6 @@ public class BlockFlag implements ConfigurationSerializable {
         }
         Location location = new Location(world, (Double) args.get("x"), (Double) args.get("y"), (Double) args.get("z"));
         //String name, Location location, List<PotionEffect> effects, boolean claimable
-        return new BlockFlag((String) args.get("name"), location, (List<PotionEffect>) args.get("effects"), (Boolean) args.get("claimable"));
+        return new BlockFlag((String) args.get("name"), location, (List<PotionEffect>) args.get("effects"), (Long) args.get("lastclaimed"));
     }
 }
