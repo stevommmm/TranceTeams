@@ -31,20 +31,22 @@ public class FlagManager {
         populate();
         
         for (final BlockFlag flag: _flags.values()) {
-            _plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    World w = flag.getLocation().getWorld();
-                    ExperienceOrb orb = w.spawn(flag.getLocation(), ExperienceOrb.class);
-                    for (Entity e: orb.getNearbyEntities(40D, 40D, 40D)) {
-                        if (e.getType() == EntityType.PLAYER) {
-                            w.strikeLightningEffect(e.getLocation());
-                            ((Player) e).setVelocity(new Vector(0, 3, 0));
+            if (!flag.isClaimable()) {
+                _plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        World w = flag.getLocation().getWorld();
+                        ExperienceOrb orb = w.spawn(flag.getLocation(), ExperienceOrb.class);
+                        for (Entity e: orb.getNearbyEntities(40D, 40D, 40D)) {
+                            if (e.getType() == EntityType.PLAYER) {
+                                w.strikeLightningEffect(e.getLocation());
+                                ((Player) e).setVelocity(new Vector(0, 3, 0));
+                            }
                         }
+                        _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + " has respawned!");
                     }
-                    _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + " has respawned!");
-                }
-            }, 360 * 20, flag.getClaimWait());
+                }, flag.getClaimWait());
+            }
         }
     }
     
