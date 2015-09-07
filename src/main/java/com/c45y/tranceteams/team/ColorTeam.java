@@ -7,11 +7,11 @@ package com.c45y.tranceteams.team;
 
 import com.c45y.tranceteams.TranceTeams;
 import com.c45y.tranceteams.util.ColorMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
@@ -69,8 +69,8 @@ public class ColorTeam {
         return this.config.getPlayers().size();
     }
     
-    public Collection<? extends Player> getOnlinePlayers() {
-        Collection<? extends Player> onlineCopy = this.plugin.getServer().getOnlinePlayers();
+    public List<Player> getOnlinePlayers() {
+        List<Player> onlineCopy = new ArrayList(this.plugin.getServer().getOnlinePlayers());
         onlineCopy.retainAll(this.config.getPlayers());
         return onlineCopy;
     } 

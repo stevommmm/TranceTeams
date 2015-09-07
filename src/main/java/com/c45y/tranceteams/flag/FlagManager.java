@@ -8,6 +8,7 @@ package com.c45y.tranceteams.flag;
 import com.c45y.tranceteams.TranceTeams;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Random;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -21,7 +22,7 @@ import org.bukkit.util.Vector;
  *
  * @author c45y
  */
-public class FlagManager {
+public final class FlagManager {
     private TranceTeams _plugin;
     private HashMap<Location, BlockFlag> _flags;
     
@@ -32,22 +33,33 @@ public class FlagManager {
         
         for (final BlockFlag flag: _flags.values()) {
             if (!flag.isClaimable()) {
-                _plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        World w = flag.getLocation().getWorld();
-                        ExperienceOrb orb = w.spawn(flag.getLocation(), ExperienceOrb.class);
-                        for (Entity e: orb.getNearbyEntities(40D, 40D, 40D)) {
-                            if (e.getType() == EntityType.PLAYER) {
-                                w.strikeLightningEffect(e.getLocation());
-                                ((Player) e).setVelocity(new Vector(0, 3, 0));
-                            }
-                        }
-                        _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + " has respawned!");
-                    }
-                }, flag.getClaimWait());
+                beinRespawnTimer(flag);
             }
         }
+    }
+    
+    public void beinRespawnTimer(final BlockFlag flag) {
+        _plugin.getServer().getScheduler().scheduleSyncDelayedTask(_plugin, new Runnable() {
+            @Override
+            public void run() {
+                _plugin.getServer().broadcastMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + flag.getName() + " will respawn in one minute!");
+            }
+        }, flag.getClaimWaitTicks() - 1200);
+        _plugin.getServer().getScheduler().scheduleSyncDelayedTask(_plugin, new Runnable() {
+            @Override
+            public void run() {
+                World w = flag.getLocation().getWorld();
+                ExperienceOrb orb = w.spawn(flag.getLocation(), ExperienceOrb.class);
+                for (Entity e: orb.getNearbyEntities(40D, 40D, 40D)) {
+                    if (e.getType() == EntityType.PLAYER) {
+                        w.strikeLightningEffect(e.getLocation());
+                        ((Player) e).setVelocity(new Vector(new Random().nextInt(1), 1, new Random().nextInt(1)));
+                    }
+                }
+                orb.remove();
+                _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + " flag has respawned!");
+            }
+        }, flag.getClaimWaitTicks());
     }
     
     public final void populate() {

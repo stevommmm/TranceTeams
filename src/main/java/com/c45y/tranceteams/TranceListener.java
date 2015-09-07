@@ -189,9 +189,12 @@ public class TranceListener implements Listener {
         }
         
         if (!flag.isClaimable()) {
+            event.getPlayer().sendMessage(ChatColor.RED + "Flag is not claimable for " + flag.getClaimWait() / 60 + " seconds");
             return;
         }
+        event.getPlayer().sendMessage(ChatColor.GOLD + "You have claimed flag " + flag.getName() + " for your team!");
         flag.toggleClaimable();
+        _plugin.flagManager.beinRespawnTimer(flag);
         
         ColorTeam team = _plugin.teamManager.getTeam(event.getPlayer());
         if (team == null) {

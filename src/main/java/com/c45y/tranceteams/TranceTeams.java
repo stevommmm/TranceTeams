@@ -137,12 +137,13 @@ public class TranceTeams extends JavaPlugin {
                     player.sendMessage("Missing args, /create <name>");
                     return true;
                 }
-                List<Block> blocks = player.getLineOfSight((HashSet<Material>) null, 4);
-                if (blocks.isEmpty()) {
+                Block target = player.getTargetBlock((HashSet<Material>) null, 4);
+                if (target == null) {
                     player.sendMessage("You need to be looking at a block");
                     return true;
                 }
-                Location location = blocks.get(0).getLocation();
+                target.setType(Material.GLOWSTONE);
+                Location location = target.getLocation();
                 this.flagManager.addFlag(new BlockFlag(args[1], location, player.getActivePotionEffects()));
                 player.sendMessage(String.format("Flag created at %f, %f, %f with buffs:", new Object[] {location.getX(), location.getY(), location.getZ()}));
                 for (PotionEffect effect: player.getActivePotionEffects()) {
