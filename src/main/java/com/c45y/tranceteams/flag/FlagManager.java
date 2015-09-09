@@ -9,6 +9,7 @@ import com.c45y.tranceteams.TranceTeams;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -31,7 +32,7 @@ public final class FlagManager {
         _flags = new HashMap<Location, BlockFlag>();
         populate();
         
-        for (final BlockFlag flag: _flags.values()) {
+        for (BlockFlag flag: _flags.values()) {
             if (!flag.isClaimable()) {
                 beinRespawnTimer(flag);
             }
@@ -39,13 +40,8 @@ public final class FlagManager {
     }
     
     public void beinRespawnTimer(final BlockFlag flag) {
-        _plugin.getServer().getScheduler().scheduleSyncDelayedTask(_plugin, new Runnable() {
-            @Override
-            public void run() {
-                _plugin.getServer().broadcastMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + flag.getName() + " will respawn in one minute!");
-            }
-        }, flag.getClaimWaitTicks() - 1200);
-        _plugin.getServer().getScheduler().scheduleSyncDelayedTask(_plugin, new Runnable() {
+        _plugin.getLogger().log(Level.INFO, "Began reset timer with {0} ticks", flag.getClaimWaitTicks());
+        _plugin.getServer().getScheduler().runTaskLater(_plugin, new Runnable() {
             @Override
             public void run() {
                 World w = flag.getLocation().getWorld();
@@ -53,13 +49,14 @@ public final class FlagManager {
                 for (Entity e: orb.getNearbyEntities(40D, 40D, 40D)) {
                     if (e.getType() == EntityType.PLAYER) {
                         w.strikeLightningEffect(e.getLocation());
-                        ((Player) e).setVelocity(new Vector(new Random().nextInt(1), 1, new Random().nextInt(1)));
+                        ((Player) e).setHealth(0D);
                     }
                 }
                 orb.remove();
-                _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + " flag has respawned!");
+                _plugin.getServer().broadcastMessage(ChatColor.GOLD + "" + ChatColor.BOLD + flag.getName() + ChatColor.RESET + "" + ChatColor.GOLD + " flag has respawned!");
             }
         }, flag.getClaimWaitTicks());
+        
     }
     
     public final void populate() {

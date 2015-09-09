@@ -75,7 +75,7 @@ public class BlockFlag implements ConfigurationSerializable {
     }
     
     public long getClaimWaitTicks() {
-        return getClaimWait() / 20;
+        return getClaimWait() * 20;
     }
     
     public void toggleClaimable() {

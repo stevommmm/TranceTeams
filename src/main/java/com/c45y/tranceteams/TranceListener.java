@@ -189,7 +189,7 @@ public class TranceListener implements Listener {
         }
         
         if (!flag.isClaimable()) {
-            event.getPlayer().sendMessage(ChatColor.RED + "Flag is not claimable for " + flag.getClaimWait() / 60 + " seconds");
+            event.getPlayer().sendMessage(ChatColor.RED + "Flag is not claimable for " + flag.getClaimWait() / 1000 + " seconds");
             return;
         }
         event.getPlayer().sendMessage(ChatColor.GOLD + "You have claimed flag " + flag.getName() + " for your team!");
@@ -203,6 +203,7 @@ public class TranceListener implements Listener {
         
         for (Player p: team.getOnlinePlayers()) {
             p.addPotionEffects(flag.getEffects());
+            _plugin.getLogger().log(Level.INFO, "Added potion effect to player {0}", p.getName());
         }
     }
 }
